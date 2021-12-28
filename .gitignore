@@ -1,0 +1,4 @@
+__pycache__/
+.neptune/
+env/
+config.py

@@ -1,0 +1,7 @@
+neptune-client
+pandas
+numpy
+matplotlib
+scikit-learn
+tensorflow
+ipykernel
