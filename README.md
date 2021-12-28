@@ -4,6 +4,10 @@ Article: https://neptune.ai/blog/predicting-stock-prices-using-machine-learning
 
 Code: https://github.com/YiLi225/NeptuneBlogs/blob/main/Predicting_StockPrices.py
 
+## Get data from Alpha Vantage
+
+https://www.alphavantage.co/
+
 ## Create new neptune project
 
 ![](https://i0.wp.com/neptune.ai/wp-content/uploads/Stock-prediction-Create_Neptune_Project.gif)
