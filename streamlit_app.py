@@ -19,13 +19,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import datetime as dt
 import urllib.request, json
-import config 
+
 from helpers import *
 
-import os
-# os.environ['NEPTUNE_API_TOKEN'] = config.neptune_token
-
-api_key = config.alphavantage_key
+api_key = st.secrets["alphavantage_key"]
 # stock ticker symbol
 # ticker = 'SAF.PA' 
 ticker = st.sidebar.text_input("Ticker",value="SAF.PA")

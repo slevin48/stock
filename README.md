@@ -1,4 +1,4 @@
-# Predicting Stock Prices Using Machine Learning
+# Predicting Stock Prices Using Machine Learning [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/slevin48/stock)
 
 Article: https://neptune.ai/blog/predicting-stock-prices-using-machine-learning
 
