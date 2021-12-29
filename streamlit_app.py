@@ -45,13 +45,15 @@ st.sidebar.text(name)
 
 t = st.sidebar.checkbox("Display Table")
 save = st.sidebar.checkbox("Save Table")
-# sma = st.sidebar.checkbox("Simple Moving Average")
-# ema = st.sidebar.checkbox("Exponential Moving Average")
+sma = st.sidebar.checkbox("Simple Moving Average")
+ema = st.sidebar.checkbox("Exponential Moving Average")
 # lstm = st.sidebar.checkbox("Long Short-Term Memory")
 
+window_size = 50
+window_var = str(window_size) + 'day'
 
 
-@st.cache
+@st.cache(allow_output_mutation=True)
 def load_data():
 ### get the low, high, close, and open prices 
     with urllib.request.urlopen(url_string) as url:
@@ -87,5 +89,40 @@ if save:
     fileName = 'stock_market_data-%s.csv'%ticker
     df.to_csv("data/"+fileName)
 
+if sma:
+    st.markdown("## Simple Moving Average")
+       
+    stockprices[window_var] = stockprices['Close'].rolling(window_size).mean()
+    ### Include a 200-day SMA for reference 
+    stockprices['200day'] = stockprices['Close'].rolling(200).mean()
+        
+    ### Plot and performance metrics for SMA model
+    fig, ax = plt.subplots()
+    ax.plot(stockprices['Date'],stockprices[['Close', window_var,'200day']])
+    plt.grid(False)
+    plt.title('Simple Moving Average - '+name)
+    plt.axis('tight')
+    plt.ylabel('Stock Price ($)')
+    st.pyplot(fig)
+
+if ema:
+    st.markdown("## Exponential Moving Average")
+        
+    ###### Exponential MA
+    window_ema_var = window_var+'_EMA'
+    # Calculate the 50-day exponentially weighted moving average
+    stockprices[window_ema_var] = df['Close'].ewm(span=window_size, adjust=False).mean()
+    stockprices['200day'] = df['Close'].rolling(200).mean()
+          
+    ### Plot and performance metrics for EMA model
+    fig, ax = plt.subplots()
+    ax.plot(stockprices['Date'],stockprices[['Close', window_ema_var,'200day']])
+    plt.grid(False)
+    plt.title('Exponential Moving Average - '+name)
+    plt.axis('tight')
+    plt.ylabel('Stock Price ($)')
+    st.pyplot(fig)
+
+# st.markdown("## Long Short-Term Memory")
 
 
