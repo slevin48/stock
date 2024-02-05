@@ -1,25 +1,9 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-
-# for reproducibility of our results
-np.random.seed(42)
-
-from datetime import date
-from matplotlib import pyplot as plt
-
-from sklearn.preprocessing import StandardScaler
-from keras.models import Model
-from keras.layers import Dense, LSTM, Input
-
-import tensorflow as tf 
-tf.random.set_seed(42)
-
 import matplotlib.pyplot as plt
-import pandas as pd
-import datetime as dt
+from datetime import datetime
 import urllib.request, json
-
 from helpers import *
 
 api_key = st.secrets["alphavantage_key"]
@@ -27,48 +11,63 @@ api_key = st.secrets["alphavantage_key"]
 # ticker = 'SAF.PA' 
 ticker = st.sidebar.text_input("Ticker",value="SAF.PA")
 
-# JSON file with all the stock prices data 
-url_string = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=%s&outputsize=full&apikey=%s"%(ticker,api_key)
-
 def search(ticker):
     url_search = "https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=%s&apikey=%s"%(ticker,api_key)
-    with urllib.request.urlopen(url_search) as url:
-        data = json.loads(url.read().decode())
-    return data
+    try:
+        with urllib.request.urlopen(url_search) as url:
+            data = json.loads(url.read().decode())
+            name = data['bestMatches'][0]['2. name']
+    except:
+        name = "Ticker not found"
+    return name
 
-keyword = search(ticker)
-name = keyword['bestMatches'][0]['2. name']
+
+def dummy_data():
+    data = {
+        'Date': ['2020-01-01', '2020-01-02', '2020-01-03', '2020-01-04', '2020-01-05'],
+        'Low': [1, 2, 3, 4, 5],
+        'High': [2, 3, 4, 5, 6],
+        'Close': [3, 4, 5, 6, 7],
+        'Open': [4, 5, 6, 7, 8]
+    }
+    df = pd.DataFrame(data)
+    return df
+
+
+@st.cache_data
+def load_data(ticker):
+    ### get the low, high, close, and open prices 
+    url_string = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=%s&outputsize=full&apikey=%s"%(ticker,api_key)
+    try:
+        with urllib.request.urlopen(url_string) as url:
+            data = json.loads(url.read().decode())
+            # pull stock market data
+            data = data['Time Series (Daily)']
+            df = pd.DataFrame(columns=['Date','Low','High','Close','Open'])
+            for key,val in data.items():
+                date = datetime.strptime(key, '%Y-%m-%d')
+                data_row = [date.date(),float(val['3. low']),float(val['2. high']),
+                            float(val['4. close']),float(val['1. open'])]
+                df.loc[-1,:] = data_row
+                df.index = df.index + 1
+    except:
+        df = pd.read_csv('data/stock_market_data-%s.csv'%ticker)
+    return df
+
+name = search(ticker)
 st.sidebar.text(name)
 
 t = st.sidebar.checkbox("Display Table")
-save = st.sidebar.checkbox("Save Table")
 sma = st.sidebar.checkbox("Simple Moving Average")
 ema = st.sidebar.checkbox("Exponential Moving Average")
-# lstm = st.sidebar.checkbox("Long Short-Term Memory")
 
 window_size = 50
 window_var = str(window_size) + 'day'
 
+st.title("📈 "+ ticker)
 
-@st.cache(allow_output_mutation=True)
-def load_data():
-### get the low, high, close, and open prices 
-    with urllib.request.urlopen(url_string) as url:
-        data = json.loads(url.read().decode())
-        # pull stock market data
-        data = data['Time Series (Daily)']
-        df = pd.DataFrame(columns=['Date','Low','High','Close','Open'])
-        for key,val in data.items():
-            date = dt.datetime.strptime(key, '%Y-%m-%d')
-            data_row = [date.date(),float(val['3. low']),float(val['2. high']),
-                        float(val['4. close']),float(val['1. open'])]
-            df.loc[-1,:] = data_row
-            df.index = df.index + 1
-    return df
-
-st.title("📈 "+name)
-
-df = load_data()
+df = load_data(ticker)
+# df = dummy_data()
 stockprices = df.sort_values('Date')
 
 fig, ax = plt.subplots()
@@ -77,14 +76,13 @@ st.pyplot(fig)
 
 
 if t:    
-    st.dataframe(df)
+    # df without index
+    st.sidebar.dataframe(df)
     # st.table(df)
-
-
-if save:
-    # Save data to this file
-    fileName = 'stock_market_data-%s.csv'%ticker
-    df.to_csv("data/"+fileName)
+    st.sidebar.download_button(label="Download data as CSV",data=df.to_csv(),file_name=f'stock_market_data-{ticker}.csv',mime='text/csv')
+    # # Save data to this file
+    # fileName = 'stock_market_data-%s.csv'%ticker
+    # df.to_csv("data/"+fileName)
 
 if sma:
     st.markdown("## Simple Moving Average")
@@ -119,7 +117,5 @@ if ema:
     plt.axis('tight')
     plt.ylabel('Stock Price ($)')
     st.pyplot(fig)
-
-# st.markdown("## Long Short-Term Memory")
 
 
