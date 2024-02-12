@@ -4,3 +4,4 @@ env/
 config.py
 analysis/
 .streamlit/
+positions/

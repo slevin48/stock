@@ -2,6 +2,18 @@ import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
 
+#### Create dummy data for testing ####
+def dummy_data():
+    data = {
+        'Date': ['2020-01-01', '2020-01-02', '2020-01-03', '2020-01-04', '2020-01-05'],
+        'Low': [1, 2, 3, 4, 5],
+        'High': [2, 3, 4, 5, 6],
+        'Close': [3, 4, 5, 6, 7],
+        'Open': [4, 5, 6, 7, 8]
+    }
+    df = pd.DataFrame(data)
+    return df
+
 #### Define helper functions to calculate the metrics RMSE and MAPE ####
 def calculate_rmse(y_true, y_pred):
     """
