@@ -8,3 +8,4 @@ ipykernel
 streamlit
 tabulate
 yfinance
+alpha_vantage
